@@ -1,0 +1,2 @@
+# kruger
+practica kruger
