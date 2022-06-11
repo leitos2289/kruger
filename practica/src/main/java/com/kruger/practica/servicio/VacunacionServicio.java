@@ -1,28 +1,15 @@
 package com.kruger.practica.servicio;
 
-import java.util.Optional;
+import com.kruger.practica.dto.VacunacionDTO;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import java.sql.Date;
+import java.util.List;
 
-import com.kruger.practica.modelo.Vacunacion;
-import com.kruger.practica.repositorio.VacunacionRepositorio;
-
-@Service
-public class VacunacionServicio {
-	
-	@Autowired
-	VacunacionRepositorio vacunacionRepositorio;
-	
-	public Vacunacion saveVacunacion(Vacunacion vacunacion) {
-		vacunacionRepositorio.save(vacunacion);
-		return vacunacion;
-	}
-
-	public Vacunacion listarVacuncacion(){
-		
-		Optional<Vacunacion> lista = vacunacionRepositorio.findById(1);
-		return lista.get();
-	}
+public interface VacunacionServicio {
+	public VacunacionDTO saveVacunacion(VacunacionDTO vacunacionDTO, Integer cpersona);
+	public VacunacionDTO actualizarVacunacion(VacunacionDTO vacunacionDTO, Integer id);
+	public List<VacunacionDTO> listadoPorVacuna (Integer idVacuna);
+	public List<VacunacionDTO> listadoPorEstado (boolean estado);
+	public List<VacunacionDTO> listadoPorFechas (Date fecha1, Date fecha2);
 	
 }

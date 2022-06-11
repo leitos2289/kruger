@@ -1,11 +1,19 @@
 package com.kruger.practica.servicio;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
-
+import com.kruger.practica.dto.RegistroDTO;
+import com.kruger.practica.excepciones.AppException;
+import com.kruger.practica.modelo.Rol;
+import com.kruger.practica.modelo.Usuario;
+import com.kruger.practica.repositorio.RolRepositorio;
+import com.kruger.practica.repositorio.UsuarioRepositorio;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import com.kruger.practica.dto.EmpleadoDTO;
 import com.kruger.practica.excepciones.ResourceNotFoundException;
@@ -20,20 +28,31 @@ public class EmpleadoServicioImpl implements EmpleadoServicio{
 	
 	@Autowired
 	EmpleadoRepositorio empleadoRepositorio;
+	@Autowired
+	private UsuarioRepositorio usuarioRepositorio;
+	@Autowired
+	private RolRepositorio rolRepositorio;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	@Override
-	public EmpleadoDTO saveEmpleado(EmpleadoDTO empleadoDTO) {
-		return this.guardarEmpleado(empleadoDTO);
+	public EmpleadoDTO saveEmpleado(EmpleadoDTO empleadoDTO, RegistroDTO registroDTO) throws Exception {
+		try {
+			return this.guardarEmpleado(empleadoDTO, registroDTO);
+		} catch (Exception e) {
+			throw new Exception(e.getMessage());
+		}
 	}
 	
-	private EmpleadoDTO guardarEmpleado(EmpleadoDTO empleadoDTO) {
+	private EmpleadoDTO guardarEmpleado(EmpleadoDTO empleadoDTO, RegistroDTO registroDTO) throws Exception {
 		if(Validaciones.getInstance().validarCedula(empleadoDTO.getCedula())) {
 			Empleado empleado = this.mapearEntidad(empleadoDTO);
 			Empleado newEmpleado = empleadoRepositorio.save(empleado);
 			EmpleadoDTO empleadoRes = this.mapearDTO(newEmpleado);
+			this.guardarUsuario(registroDTO);
 			return empleadoRes;
 		}
-		return empleadoDTO;
+		throw new Exception("Cédula incorrecta");
 	}
 
 	@Override
@@ -47,7 +66,8 @@ public class EmpleadoServicioImpl implements EmpleadoServicio{
 	 * @param empleado
 	 * @return
 	 */
-	private EmpleadoDTO mapearDTO(Empleado empleado) {
+	@Override
+	public EmpleadoDTO mapearDTO(Empleado empleado) {
 		EmpleadoDTO empleadoDTO = new EmpleadoDTO();
 		empleadoDTO.setCempleado(empleado.getCempleado());
 		empleadoDTO.setNombre(empleado.getNombre());
@@ -63,7 +83,7 @@ public class EmpleadoServicioImpl implements EmpleadoServicio{
 	 * @param empleadoDTO
 	 * @return
 	 */
-	private Empleado mapearEntidad(EmpleadoDTO empleadoDTO) {
+	public Empleado mapearEntidad(EmpleadoDTO empleadoDTO) {
 		Empleado empleado = new Empleado();
 		empleado.setCempleado(empleadoDTO.getCempleado());
 		empleado.setNombre(empleadoDTO.getNombre());
@@ -75,23 +95,55 @@ public class EmpleadoServicioImpl implements EmpleadoServicio{
 
 	@Override
 	public EmpleadoDTO obtenerEmpleadoPorId(Integer id) {
-		Empleado empleado = empleadoRepositorio.findById(id).
-				orElseThrow(() -> new ResourceNotFoundException("Empleado", "cempleado", id));
+		Empleado empleado = buscarEmpleado(id);
 
 		return mapearDTO(empleado);
 	}
 
 	@Override
-	public EmpleadoDTO actualizarEmpleado(EmpleadoDTO empleadoDTO, Integer cpersona) {
-		Empleado empleado = empleadoRepositorio.findById(cpersona).
-				orElseThrow(() -> new ResourceNotFoundException("Empleado", "cempleado", cpersona));
-		empleado.setNombre(empleadoDTO.getNombre());
-		empleado.setApellido(empleadoDTO.getApellido());
-		empleado.setEmail(empleadoDTO.getEmail());
-		empleado.setCedula(empleadoDTO.getCedula());
-		
+	public void eliminarEmpleado(Integer cpersona) {
+		Empleado empleado = buscarEmpleado(cpersona);
+		empleadoRepositorio.delete(empleado);
+	}
+
+	@Override
+	public EmpleadoDTO actualizarEmpleado(EmpleadoDTO empleadoDTO, boolean estado) {
+		Empleado empleado = buscarEmpleado(empleadoDTO.getCempleado());
+		if (estado){
+			empleado.setNombre(empleadoDTO.getNombre());
+			empleado.setApellido(empleadoDTO.getApellido());
+			empleado.setEmail(empleadoDTO.getEmail());
+			empleado.setCedula(empleadoDTO.getCedula());
+		}else {
+			empleado.setDireccion(empleadoDTO.getDireccion());
+			empleado.setFechaNacimiento(empleadoDTO.getFechaNacimiento());
+			empleado.setMovil(empleadoDTO.getMovil());
+			empleado.setVacunado(empleadoDTO.isVacunado());
+		}
 		Empleado updateEmpleado = empleadoRepositorio.save(empleado);
 		return mapearDTO(updateEmpleado);
+	}
+
+	public Empleado buscarEmpleado(Integer cpersona){
+		return empleadoRepositorio.findById(cpersona).
+				orElseThrow(() -> new ResourceNotFoundException("Empleado", "cempleado", cpersona));
+
+	}
+
+	public void guardarUsuario(RegistroDTO registroDTO){
+		if(!usuarioRepositorio.existsByUsername(registroDTO.getUsername())
+				&& !usuarioRepositorio.existsByEmail(registroDTO.getEmail())) {
+			Usuario usuario = new Usuario();
+			usuario.setNombre(registroDTO.getNombre());
+			usuario.setUsername(registroDTO.getUsername());
+			usuario.setEmail(registroDTO.getEmail());
+			usuario.setPassword(passwordEncoder.encode(registroDTO.getPassword()));
+			Rol roles = rolRepositorio.findByNombre("ROLE_USER").get();
+			usuario.setRoles(Collections.singleton(roles));
+			usuarioRepositorio.save(usuario);
+		}
+
+
 	}
 
 }

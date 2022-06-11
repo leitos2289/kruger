@@ -1,16 +1,13 @@
 package com.kruger.practica.modelo;
 
 import java.sql.Date;
+import java.util.HashSet;
+import java.util.Set;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
-@Table(name = "empleado")
+@Table(name = "empleado", uniqueConstraints = { @UniqueConstraint(columnNames = { "email" }) })
 public class Empleado {
 	
 	@Id
@@ -40,6 +37,9 @@ public class Empleado {
 	
 	@Column(name = "vacunado")
 	private boolean vacunado;
+
+	@OneToMany(mappedBy = "empleado", cascade = CascadeType.ALL, orphanRemoval = true)
+	private Set<Vacunacion> vacunaciones = new HashSet<>();
 	
 	public Integer getCempleado() {
 		return cempleado;

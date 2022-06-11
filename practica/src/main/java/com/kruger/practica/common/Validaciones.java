@@ -51,22 +51,9 @@ public class Validaciones {
 		}
 	}
 	
-	/**
-	 * Validar correoelectronico de una persona
-	 * @param correo
-	 * @return
-	 */
-	public boolean validarCorreo(String correo) {
-        Pattern pat = Pattern.compile("^(.+)@(.+)$");
-        Matcher mat = pat.matcher(correo);
-        return mat.matches();
-	}
-	
 	public boolean validarTexto(String texto) {
-		 Pattern pat = Pattern.compile("[a-zA-Z]{2,}");
-	     Matcher mat = pat.matcher(texto);
-		//return mat.matches();
-	     return true;
-		
+		 Pattern pat = Pattern.compile("[a-z]{2,}");
+	     Matcher mat = pat.matcher(texto.toLowerCase());
+		 return mat.matches();
 	}
 }

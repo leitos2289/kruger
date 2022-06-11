@@ -1,17 +1,22 @@
 package com.kruger.practica.dto;
 
+import javax.validation.constraints.*;
 import java.sql.Date;
 
 public class EmpleadoDTO {
 	
 	private Integer cempleado;
-	
+	@NotEmpty(message = "El cedula no debe ser vacio o nulo")
+	@Size(min=10, max=10, message = "La cedula debe tener 10 caracteres")
 	private String cedula;
-	
+	@NotEmpty(message = "El nombre no debe ser vacio o nulo")
+	@Pattern(regexp  = "[a-zA-Z]{2,}", message = "Nombre debe de contener solo letras")
 	private String nombre;
-	
+	@Pattern(regexp  = "[a-zA-Z]{2,}", message = "Apellido debe de contener solo letras")
+	@NotEmpty(message = "El apellido no debe ser vacio o nulo")
 	private String apellido;
-	
+	@NotEmpty(message = "El email no debe ser vacio o nulo")
+	@Email
 	private String email;
 	
 	private Date fechaNacimiento;

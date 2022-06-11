@@ -14,9 +14,9 @@ public class VacunacionDTO {
 	
 	private Integer dosis;
 	
-	private Empleado empleado;
+	private EmpleadoDTO empleadoDTO;
 	
-	private Vacuna vacuna;
+	private VacunaDTO vacunaDTO;
 
 	public Integer getCodigo() {
 		return codigo;
@@ -42,20 +42,20 @@ public class VacunacionDTO {
 		this.dosis = dosis;
 	}
 
-	public Empleado getEmpleado() {
-		return empleado;
+	public EmpleadoDTO getEmpleadoDTO() {
+		return empleadoDTO;
 	}
 
-	public void setEmpleado(Empleado empleado) {
-		this.empleado = empleado;
+	public void setEmpleadoDTO(EmpleadoDTO empleadoDTO) {
+		this.empleadoDTO = empleadoDTO;
 	}
 
-	public Vacuna getVacuna() {
-		return vacuna;
+	public VacunaDTO getVacunaDTO() {
+		return vacunaDTO;
 	}
 
-	public void setVacuna(Vacuna vacuna) {
-		this.vacuna = vacuna;
+	public void setVacunaDTO(VacunaDTO vacunaDTO) {
+		this.vacunaDTO = vacunaDTO;
 	}
 	
 	
